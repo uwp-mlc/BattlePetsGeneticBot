@@ -6,6 +6,7 @@ public enum PlayerTypes
 {
 	HUMAN,
 	COMPUTER,
+	DAVE,
 	JOHNS_GANG, // Team_01
 	DYNAMIC_DEVELOPERS, // Team_02
 	FND5A, // Team_03

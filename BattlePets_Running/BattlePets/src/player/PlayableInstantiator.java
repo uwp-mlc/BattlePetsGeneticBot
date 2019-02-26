@@ -28,6 +28,7 @@ import edu.team17.WorkAI;
 import edu.team18.GiraffesAI;
 import edu.team19.PioneerPetInstance;
 */
+import team_mlc.DavePetInstance;
 
 public class PlayableInstantiator
 {
@@ -54,7 +55,10 @@ public class PlayableInstantiator
 		if(playerType == PlayerTypes.HUMAN)
 		{
 			thePlayable = new HumanPetInstance(playerInfo);
-		}/*
+		}
+		
+		
+		/*
 		else if(playerType == PlayerTypes.JOHNS_GANG) // Team_01
 		{
 			thePlayable = new JohnsGangPetInstance(playerInfo);
@@ -157,6 +161,12 @@ public class PlayableInstantiator
 			// Doug's default AI
 			thePlayable = new ComputerPetInstance(playerInfo);
 		}
+		
+		else if(playerType == PlayerTypes.DAVE)
+		{
+			thePlayable = new DavePetInstance(playerInfo);
+		}
+		
 		else
 		{
 			// TODO make custom exception

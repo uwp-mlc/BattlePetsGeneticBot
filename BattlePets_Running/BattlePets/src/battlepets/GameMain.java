@@ -1,5 +1,7 @@
 package battlepets;
 
+import python.PythonCommunicator;
+
 public class GameMain
 {
 	private static void outputUsage()
@@ -20,6 +22,7 @@ public class GameMain
 	
 	public static void main(String[] args)
 	{
+		PythonCommunicator.pythonChooseSkill();
 		// TODO have option to load default game settings from properties file?
 				
 		GameRunner gameRunner = null;

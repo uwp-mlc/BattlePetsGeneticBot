@@ -7,17 +7,31 @@ import os
 import neat
 
 # 2-input XOR inputs and expected outputs.
+# 3 opponent type
+# 3 its type
+# 5 cooldowns
+# 5 opp cooldown
+# 5 last attack
+# 5 opp last attack
+# 1 health
+# 1 opp health
 xor_inputs = [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]
 xor_outputs = [   (0.0,),     (1.0,),     (1.0,),     (0.0,)]
 
 
 def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
-        genome.fitness = 4.0
-        net = neat.nn.FeedForwardNetwork.create(genome, config)
-        for xi, xo in zip(xor_inputs, xor_outputs):
-            output = net.activate(xi)
-            genome.fitness -= (output[0] - xo[0]) ** 2
+        # Play the game
+        while not game_finished:
+            # Output game inputs
+            net.activate(game_inputs)
+
+        # Evaluate fitness
+        # genome.fitness = 4.0
+        # net = neat.nn.FeedForwardNetwork.create(genome, config)
+        # for xi, xo in zip(xor_inputs, xor_outputs):
+        #     output = net.activate(xi)
+        #     genome.fitness -= (output[0] - xo[0]) ** 2
 
 
 def run(config_file):

@@ -58,8 +58,7 @@ num_hidden              = 20
 # 1 opp health
 num_inputs              = 28
 
-# 5 for each attack
-# 5 for prediction attack
+  
 num_outputs             = 10
 
 # node response options

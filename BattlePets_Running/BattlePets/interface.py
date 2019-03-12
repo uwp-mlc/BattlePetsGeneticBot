@@ -1,37 +1,34 @@
-import subprocess
-import threading, queue
-import time
+from pexpect import popen_spawn
+from pexpect import exceptions
 
-def send_input(proc, inp):
-    proc.stdin.flush()
-    proc.stdin.write("{}\n".format(inp).encode())
+responses = {'Enter a random seed':'1', 
+                'Enter a number of players':'2', 
+                'Enter a number of fights':'1',
+                'Enter the player type for player 1':'2',
+                'Enter the pet type for player 1':'1',
+                'Enter a name for player 1':'P1',
+                'P1: Enter a name for your pet':'PET1',
+                'Enter the player type for player 2':'2',
+                'Enter the pet type for player 2':'1',
+                'Enter a name for player 2':'P2',
+                'P2: Enter a name for your pet':'PET2',
+                'Enter a starting hp':100,
+                'Player 2\r\nPlayer Name: P2\r\nPet Name: PET2\r\nPet Type: Power\r\nStarting HP: 100.0\r\n\n\r\n':1,
+                }
 
-def output_reader(proc):
-
-    for line in iter(proc.stdout.readline, b''):
-        print('got line: {0}'.format(line.decode('utf-8')), end='')
-
-proc = subprocess.Popen(['java', '-cp', 'bp.jar', "battlepets.GameMain"], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
-t = threading.Thread(target=output_reader, args=(proc,))
-
-t.start()
-
-send_input(proc, "1") # seed
-send_input(proc, "2") # num players
-send_input(proc, "10") # num fights
-send_input(proc, "2") # p1 type
-send_input(proc, "1") # p1 power type
-send_input(proc, "P1") # p1 name
-send_input(proc, "Pet1") # p1 pet name
-send_input(proc, "100") # p1 hp
-send_input(proc, "2") # p2 type
-send_input(proc, "1") # p2 power type
-send_input(proc, "P2") # p2 name
-send_input(proc, "Pet2") # p2 pet name
-send_input(proc, "100") # p2 hp
-
-send_input(proc, "asd") # random garbage to see next line
-
-time.sleep(1)
+expected = list(responses.keys())
     
+child = popen_spawn.PopenSpawn(['java', '-cp', 'bp.jar', "battlepets.GameMain"])
 
+#print(child.readline())
+while True:
+        try:
+                expected_index = child.expect(expected,timeout=1)
+                print(expected[expected_index])
+                print('Entering: {}'.format(responses[expected[expected_index]]))
+                child.write("{}\n".format(responses[expected[expected_index]]).encode())
+                child.flush()
+        except exceptions.TIMEOUT:
+                line = child.readline()
+                if not line == b'\r\n':
+                        print(line)

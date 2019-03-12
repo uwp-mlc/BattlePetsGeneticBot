@@ -7,27 +7,37 @@ responses = {'Enter a random seed':'1',
                 'Enter the player type for player 1':'2',
                 'Enter the pet type for player 1':'1',
                 'Enter a name for player 1':'P1',
-                'P1: Enter a name for your pet':'PET1',
+                'P1: Enter a name for your pet':'PET1', # if name changes change this line
                 'Enter the player type for player 2':'2',
                 'Enter the pet type for player 2':'1',
                 'Enter a name for player 2':'P2',
-                'P2: Enter a name for your pet':'PET2',
+                'P2: Enter a name for your pet':'PET2', # if name changes change this line
                 'Enter a starting hp':100,
                 'Player 2\r\nPlayer Name: P2\r\nPet Name: PET2\r\nPet Type: Power\r\nStarting HP: 100.0\r\n\n\r\n':1,
                 }
 
+# pexpect list, this is a list of keys from the reponses dictionary
 expected = list(responses.keys())
-    
+
+# create a piped thread for java process 
 child = popen_spawn.PopenSpawn(['java', '-cp', 'bp.jar', "battlepets.GameMain"])
 
-#print(child.readline())
+
 while True:
         try:
+                # index of expected string
                 expected_index = child.expect(expected,timeout=1)
                 print(expected[expected_index])
-                print('Entering: {}'.format(responses[expected[expected_index]]))
-                child.write("{}\n".format(responses[expected[expected_index]]).encode())
+                # get response from dictionary through list index
+                response = responses[expected[expected_index]]
+                print('Entering: {}'.format(response))
+                # write response
+                child.write("{}\n".format(response).encode())
+                # clear stdout line
                 child.flush()
+        
+        # if expect cannot find match
+        # print line
         except exceptions.TIMEOUT:
                 line = child.readline()
                 if not line == b'\r\n':

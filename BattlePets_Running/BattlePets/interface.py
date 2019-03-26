@@ -8,6 +8,8 @@ player2_name = 'P2'
 pet1_name = 'PET1'
 pet2_name = 'PET2'
 
+starting_hp = 100.0
+
 # responses based on stdout value
 responses = {'Enter a random seed':'1', 
                 'Enter a number of players':'2', 
@@ -20,11 +22,11 @@ responses = {'Enter a random seed':'1',
                 'Enter the pet type for player 2':'1',
                 'Enter a name for player 2':player2_name,
                 '{}: Enter a name for your pet'.format(player2_name):pet2_name, # if name changes change this line
-                'Enter a starting hp':100,
+                'Enter a starting hp':starting_hp,
                 'Round 1 Started':None,
                 'Battle Started':None,
                 'Number of Fights = ':None,
-                'Starting HP: ':None,
+                'Starting HP: {}'.format(starting_hp):None,
                 'Pets':None,
                 'Pet 1':None,
                 'Pet 2':None,
@@ -33,6 +35,7 @@ responses = {'Enter a random seed':'1',
                 'Pet Type: ':None,
                 'Current HP: ':None,
                 r'^(\n\r\n)':None,
+                'Round 1 Started':None,
                 }
 
 # pexpect list, this is a list of keys from the reponses dictionary
@@ -58,21 +61,28 @@ def game_init():
                         if response:
                                 print('Entering: {}'.format(response))
                                 child.write("{}\n".format(response).encode())
+
+                                
+                        if 'Pet Name: PET2' == output:
+                                child.write("{}\n")
                         
+                        if 'Round 1 Started' == output:
+                                return
                         # clear stdout line
-                        child.readline()
+                        child.read_nonblocking(-1,1)
                 
                 # if expect cannot find match
                 # print line
                 except exceptions.TIMEOUT:
-                        line = child.readline()
-                        if not line == b'\r\n':
+                        line = child.read_nonblocking(-1,1)
+                        if not line == b'\r\n' and not line ==  b'':
                                 print(line)
 
 game_init()
 
 def send_att():
         child.write("{}\n".format('1').encode())
-        print(child.readline())
+        while True:
+                print(child.readline())
 
 send_att()

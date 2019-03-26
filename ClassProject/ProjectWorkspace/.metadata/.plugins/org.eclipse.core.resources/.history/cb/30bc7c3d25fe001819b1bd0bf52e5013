@@ -1,0 +1,409 @@
+/**
+ * 
+ */
+package edu.furbiesfighters.players;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Observable;
+
+import edu.furbiesfighters.events.AttackEvent;
+import edu.furbiesfighters.events.FightStartEvent;
+import edu.furbiesfighters.events.PlayerEventInfo;
+import edu.furbiesfighters.events.RoundStartEvent;
+import edu.furbiesfighters.skills.Skills;
+import edu.furbiesfighters.utility.Utility;
+
+/**
+ * @author Furbies Fighters
+ *
+ */
+public class JarvisPlayer extends Player { //extends Pet for doug
+	protected Map<Skills, Integer> rechargingOpponentSkills, jarvisRechargingSkills;
+	private int roundNumber, fightNumber, opponentIndex, opponentHealth, oppRandomDmd, oppConditionalDmg, jarvisIndex;
+	private String opponentName;
+	private PetTypes opponentType;
+	private Map<Integer, Double> randomDifference;
+	//only care about my opponent's previous skill and my opponent's opponenets skill(jarvis's).
+	//private int timeSinceLastROFUse;
+	
+	//Need to add all events to GUI version to get data in GUI version.
+	
+	public JarvisPlayer(double initialHP, String name, String petName, PetTypes petType) {
+		super(initialHP, name, petName, PetTypes.INTELLIGENCE, PlayerTypes.AI);
+		//this.rechargingSkills = new HashMap<Skills, Integer>();
+		this.fightNumber = 1;
+		this.roundNumber = 1;
+		this.randomDifference = new HashMap<Integer, Double>();
+		this.rechargingOpponentSkills = new HashMap<Skills, Integer>();
+		this.rechargingOpponentSkills.put(Skills.ROCK_THROW, 0);
+		this.rechargingOpponentSkills.put(Skills.SCISSOR_POKE, 0);
+		this.rechargingOpponentSkills.put(Skills.PAPER_CUT, 0);
+		this.rechargingOpponentSkills.put(Skills.SHOOT_THE_MOON, 0);
+		this.rechargingOpponentSkills.put(Skills.REVERSAL_OF_FORTUNE, 0);
+		// TODO Auto-generated constructor stub
+	}
+	
+	@Override
+	public Skills chooseSkill()
+	{
+		String rechargeString = "";
+		Utility.printEndline();
+		for(Skills skill : super.rechargingSkills.keySet())
+		{
+			int time = this.rechargingSkills.get(skill);
+			if(time != 0)
+				rechargeString += super.name + " has " + skill.toString() + " is recharging for " + time + " plays.\n\n";
+		}
+		if(Utility.isGUI)
+			rechargeString = "";
+		if(rechargeString.length() == 0)
+			Utility.printMessage(this.name + " has no skills recharging and has chosen a skill.\n");
+		else
+			Utility.printMessage(rechargeString + super.name + " has chosen a skill.");
+		
+		return learnSkill();
+	}
+
+	private Skills learnSkill()
+	{
+		Map<Skills, Double> outputDamageMap;
+		Map<Skills, Double> inputDamageMap;
+		Map<Skills, Double> differenceMap;
+		Skills skill;
+		
+		skill = null;
+		
+		outputDamageMap = populateOutputMap();
+		
+		if (this.opponentType == PetTypes.POWER)
+		{
+			inputDamageMap = populateInputMapWhenPower();
+		}
+		else if (this.opponentType == PetTypes.POWER)
+		{
+			inputDamageMap = populateInputMapWhenSpeed();
+		}
+		else
+		{
+			inputDamageMap = null;
+		}
+		
+		differenceMap = calculateDifferenceMap(outputDamageMap, inputDamageMap);
+		
+		skill = getBestSkillGivenDifferences(differenceMap);
+		
+		this.decrementRechargeTimes();
+		
+		this.setRechargeTime(skill, (skill == Skills.REVERSAL_OF_FORTUNE || skill == Skills.SHOOT_THE_MOON) ? 6 : 1);
+		
+		return skill;
+	}
+	
+	private Map<Skills, Double> populateOutputMap()
+	{
+		Map<Skills, Double> outputDamageMap;
+		
+		outputDamageMap = this.getBlankSkillToIntegerMap();
+		
+		if (this.getOpponentSkillRechargeTime(Skills.ROCK_THROW) > 0)
+		{
+			outputDamageMap.put(Skills.ROCK_THROW, 2.0);
+			outputDamageMap.put(Skills.PAPER_CUT, 3.0);
+		}
+		if (this.getOpponentSkillRechargeTime(Skills.SCISSOR_POKE) > 0)
+		{
+			outputDamageMap.put(Skills.SCISSOR_POKE, 2.0);
+			outputDamageMap.put(Skills.ROCK_THROW, 3.0);
+		}
+		if (this.getOpponentSkillRechargeTime(Skills.PAPER_CUT) > 0)
+		{
+			outputDamageMap.put(Skills.PAPER_CUT, 2.0);
+			outputDamageMap.put(Skills.SCISSOR_POKE, 3.0);
+		}
+		if (this.getOpponentSkillRechargeTime(Skills.SHOOT_THE_MOON) > 0)
+		{
+			outputDamageMap.put(Skills.ROCK_THROW, 2.0);
+			outputDamageMap.put(Skills.SCISSOR_POKE, 2.0);
+			outputDamageMap.put(Skills.PAPER_CUT, 2.0);
+			
+			if (this.getOpponentSkillRechargeTime(Skills.REVERSAL_OF_FORTUNE) > 0 && 
+			   (this.getOpponentSkillRechargeTime(Skills.ROCK_THROW) > 0 ||
+				this.getOpponentSkillRechargeTime(Skills.SCISSOR_POKE) > 0 ||
+				this.getOpponentSkillRechargeTime(Skills.PAPER_CUT) > 0))
+			{
+				outputDamageMap.put(Skills.SHOOT_THE_MOON, Double.MAX_VALUE);
+			}
+			else
+			{
+				outputDamageMap.put(Skills.SHOOT_THE_MOON, (-1) * Double.MAX_VALUE);
+			}
+		}
+		else
+		{
+			outputDamageMap.put(Skills.SHOOT_THE_MOON, (-1) * Double.MAX_VALUE);
+		}
+		
+		outputDamageMap.put(Skills.REVERSAL_OF_FORTUNE, (-1) * Double.MAX_VALUE);
+		
+		return outputDamageMap;
+	}
+	
+	private Map<Skills, Double> populateInputMapWhenSpeed()
+	{
+		Map<Skills, Double> inputDamageMap = this.getBlankSkillToIntegerMap();
+		double randomDamage;
+		
+		double percent = (super.getCurrentHp() / super.getPlayerFullHP());
+		
+		if(this.getOpponentSkillRechargeTime(Skills.ROCK_THROW) == 0)
+		{
+			if(percent >= .75)
+			{
+				inputDamageMap.put(Skills.SCISSOR_POKE, 10.0);
+				inputDamageMap.put(Skills.PAPER_CUT, 10.0);
+			}
+		}
+		
+		if(this.getOpponentSkillRechargeTime(Skills.SCISSOR_POKE) == 0)
+		{
+			if(percent < .75 && percent >= .25)
+			{
+				inputDamageMap.put(Skills.ROCK_THROW, 10.0);
+				inputDamageMap.put(Skills.PAPER_CUT, 10.0);
+			}
+		}
+		
+		if(this.getOpponentSkillRechargeTime(Skills.PAPER_CUT) == 0)
+		{
+			if(percent < .25)
+			{
+				inputDamageMap.put(Skills.ROCK_THROW, 10.0);
+				inputDamageMap.put(Skills.SCISSOR_POKE, 10.0);
+			}
+		}
+		
+		return inputDamageMap;
+	}
+	
+	private Map<Skills, Double> populateInputMapWhenPower()
+	{
+		System.out.println("Opponent rock " + this.getOpponentSkillRechargeTime(Skills.ROCK_THROW));
+		System.out.println("Opponent scissor " + this.getOpponentSkillRechargeTime(Skills.SCISSOR_POKE));
+		System.out.println("Opponent paper " + this.getOpponentSkillRechargeTime(Skills.PAPER_CUT));
+		System.out.println("Opponent rof " + this.getOpponentSkillRechargeTime(Skills.REVERSAL_OF_FORTUNE));
+		System.out.println("Opponent stm " + this.getOpponentSkillRechargeTime(Skills.SHOOT_THE_MOON));
+		Map<Skills, Double> inputDamageMap;
+		double randomDamage;
+		double conditionalDamageModifier;
+		
+		inputDamageMap = this.getBlankSkillToIntegerMap();
+		randomDamage = 5.0;
+		conditionalDamageModifier = 5.0;
+		
+		if (this.getSkillRechargeTime(Skills.ROCK_THROW) == 0)
+		{
+			if (this.getOpponentSkillRechargeTime(Skills.PAPER_CUT) == 0)
+			{
+				inputDamageMap.put(Skills.ROCK_THROW, (randomDamage * conditionalDamageModifier));
+			}
+		}
+		else
+		{
+			inputDamageMap.put(Skills.ROCK_THROW, Double.MAX_VALUE);
+		}
+		if (this.getSkillRechargeTime(Skills.SCISSOR_POKE) == 0)
+		{
+			if (this.getOpponentSkillRechargeTime(Skills.ROCK_THROW) == 0)
+			{
+				inputDamageMap.put(Skills.SCISSOR_POKE, (randomDamage * conditionalDamageModifier));
+			}
+		}
+		else
+		{
+			inputDamageMap.put(Skills.SCISSOR_POKE, Double.MAX_VALUE);
+		}
+		if (this.getSkillRechargeTime(Skills.PAPER_CUT) == 0)
+		{
+			if (this.getOpponentSkillRechargeTime(Skills.SCISSOR_POKE) == 0)
+			{
+				inputDamageMap.put(Skills.PAPER_CUT, (randomDamage * conditionalDamageModifier));
+			}
+		}
+		else
+		{
+			inputDamageMap.put(Skills.PAPER_CUT, Double.MAX_VALUE);
+		}
+		if (this.getSkillRechargeTime(Skills.SHOOT_THE_MOON) == 0)
+		{
+			if ((this.getOpponentSkillRechargeTime(Skills.REVERSAL_OF_FORTUNE) > 0 && 
+				this.getOpponentSkillRechargeTime(Skills.SHOOT_THE_MOON) > 0) &&
+			   (this.getOpponentSkillRechargeTime(Skills.ROCK_THROW) > 0 ||
+				this.getOpponentSkillRechargeTime(Skills.SCISSOR_POKE) > 0 ||
+				this.getOpponentSkillRechargeTime(Skills.PAPER_CUT) > 0))
+			{
+				inputDamageMap.put(Skills.SHOOT_THE_MOON, (-1) * Double.MAX_VALUE);
+			}
+			else
+			{
+				inputDamageMap.put(Skills.SHOOT_THE_MOON, Double.MAX_VALUE);
+			}
+		}
+		else
+		{
+			inputDamageMap.put(Skills.SHOOT_THE_MOON, Double.MAX_VALUE);
+		}
+		
+		inputDamageMap.put(Skills.REVERSAL_OF_FORTUNE, Double.MAX_VALUE);
+		
+		return inputDamageMap;
+	}
+	
+	private Map<Skills, Double> calculateDifferenceMap(Map<Skills, Double> ouputMap, Map<Skills, Double> inputMap)
+	{
+		Map<Skills, Double> map;
+		
+		map = new HashMap<Skills, Double>();
+		
+		for (Map.Entry<Skills, Double> pair : ouputMap.entrySet())
+		{
+			Skills skill;
+			double d;
+			
+			skill = pair.getKey();
+			d = pair.getValue() - inputMap.get(skill);
+			
+			map.put(skill, d);
+		}
+		
+		return map;
+	}
+	
+	private Skills getBestSkillGivenDifferences(Map<Skills, Double> differenceMap)
+	{
+		Skills skill;
+		double bestDifference;
+		
+		skill = null;
+		bestDifference = (-1) * Double.MAX_VALUE;
+		
+		for (Map.Entry<Skills, Double> pair : differenceMap.entrySet())
+		{
+			if (pair.getValue() > bestDifference && this.getSkillRechargeTime(pair.getKey()) == 0)
+			{
+				bestDifference = pair.getValue();
+				skill = pair.getKey();
+			}
+		}
+		
+		return skill;
+	}
+	 
+	public int getOpponentSkillRechargeTime(Skills skill)
+	{
+		int rechargeTime;
+		
+		rechargeTime = this.rechargingOpponentSkills.get(skill);
+		
+		return rechargeTime;
+	}
+	
+	private Map<Skills, Double> getBlankSkillToIntegerMap()
+	{
+		Map<Skills, Double> map;
+		
+		map = new HashMap<Skills, Double>();
+		
+		map.put(Skills.ROCK_THROW, 0.0);
+		map.put(Skills.SCISSOR_POKE, 0.0);
+		map.put(Skills.PAPER_CUT, 0.0);
+		map.put(Skills.SHOOT_THE_MOON, 0.0);
+		map.put(Skills.REVERSAL_OF_FORTUNE, 0.0);
+		
+		return map;
+	}
+	
+	/**
+	 * The method for updating the observable.
+	 */
+	@Override
+	public void update(Observable arg0, Object event) 
+	{
+		if(event instanceof FightStartEvent)
+		{
+			FightStartEvent fse = (FightStartEvent) event;
+			rememberFightStartEvent(fse);
+			//assign fight start variables
+		}
+		if(event instanceof RoundStartEvent)
+		{
+			RoundStartEvent rse = (RoundStartEvent) event;
+			rememberRoundStartEvent(rse);
+		}         
+		if(event instanceof AttackEvent)
+		{
+			AttackEvent ae = (AttackEvent) event;
+			this.rememberAttackEvent(ae);
+			//System.out.println(this.name + " RECEIVED attack event with " + (ae.getRandomDamage()));
+			//assign attack variables
+		}
+	}
+	
+	private void rememberFightStartEvent(FightStartEvent event) {
+		this.fightNumber = event.getFightNumber();
+		List<PlayerEventInfo> playerEventInfo = event.getPlayerEventinfo();
+		
+		//Get Opponent information (index and name)
+		for(int i = 0; i < playerEventInfo.size(); i++)
+		{
+			PlayerEventInfo playerInfo = playerEventInfo.get(i);
+			this.randomDifference.put(i, 0.0);
+			if(playerInfo.getPetName().equals(super.getPetName()))
+			{	
+				this.jarvisIndex = i;
+				this.opponentIndex = (i + 1) % playerEventInfo.size();
+				this.opponentName = playerEventInfo.get(this.opponentIndex).getPetName();
+				this.opponentType = playerEventInfo.get(this.opponentIndex).getPetType();
+			}
+		}
+	}
+
+	private void rememberRoundStartEvent(RoundStartEvent event){
+		this.roundNumber = event.getRoundNumber();
+	}
+	
+	private void rememberAttackEvent(AttackEvent event)
+	{
+		if(event.getAttackingPlayerIndex() == opponentIndex)
+		{
+			int rechargeTime = (event.getAttackingSkillChoice() == Skills.REVERSAL_OF_FORTUNE || event.getAttackingSkillChoice() == Skills.SHOOT_THE_MOON) ? 6 : 1;
+			this.decrementOpponentRechargeTimes();
+			this.rechargingOpponentSkills.put(event.getAttackingSkillChoice(), rechargeTime);
+			this.oppConditionalDmg += event.getConditionalDamage();
+			this.oppRandomDmd += event.getRandomDamage();
+			this.randomDifference.put(event.getAttackingPlayerIndex(), this.randomDifference.get(event.getAttackingPlayerIndex()) - event.getRandomDamage());
+			this.randomDifference.put(event.getVictimPlayerIndex(), this.randomDifference.get(event.getVictimPlayerIndex()) + event.getRandomDamage());
+		}
+		else if(event.getAttackingPlayerIndex() == jarvisIndex)
+		{
+			this.randomDifference.put(event.getAttackingPlayerIndex(), this.randomDifference.get(event.getAttackingPlayerIndex()) - event.getRandomDamage());
+			this.randomDifference.put(event.getVictimPlayerIndex(), this.randomDifference.get(event.getVictimPlayerIndex()) + event.getRandomDamage());
+		}
+		
+	}
+	
+	private void decrementOpponentRechargeTimes()
+	{
+		for (Map.Entry<Skills, Integer> pair : rechargingOpponentSkills.entrySet())
+		{
+			int val = pair.getValue();
+			Skills s = pair.getKey();
+			
+			if (val > 0)
+			{
+				rechargingOpponentSkills.put(s, --val);
+			}
+		}
+	}
+}

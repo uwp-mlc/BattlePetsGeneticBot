@@ -1,5 +1,6 @@
 from pexpect import popen_spawn
 from pexpect import exceptions
+import os
 
 player1_name = 'P1'
 player2_name = 'P2'
@@ -42,7 +43,8 @@ responses = {'Enter a random seed':'1',
 expected = list(responses.keys())
 
 # create a piped thread for java process 
-child = popen_spawn.PopenSpawn(['java', '-cp', 'bp.jar', "battlepets.GameMain"])
+dirname = os.path.dirname(__file__)
+child = popen_spawn.PopenSpawn(['java', '-cp', dirname + '\\bp.jar', "battlepets.GameMain"])
 
 def game_init():
         init_not_done = True

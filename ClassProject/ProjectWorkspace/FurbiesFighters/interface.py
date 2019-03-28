@@ -5,29 +5,27 @@ from gamestate import *
 
 
 # responses based on stdout value
-responses = {'Enter a random seed':gamestate.seed, 
-                'Enter a number of players':gamestate.num_players, 
-                'Enter a number of fights':gamestate.num_fights,
-                'Enter the player type for player 1':gamestate.players[0].player_type,
-                'Enter the pet type for player 1':gamestate.players[0].pet_type,
-                'Enter a name for player 1':gamestate.players[0].name,
-                '{}: Enter a name for your pet'.format(gamestate.players[0].name):gamestate.players[0].pet_name, # if name changes change this line
-                'Enter the player type for player 2':'2',
-                'Enter the pet type for player 2':'1',
-                'Enter a name for player 2':gamestate.players[1].name,
-                '{}: Enter a name for your pet'.format(gamestate.players[1].name):gamestate.players[1].pet_name, # if name changes change this line
-                'Enter a starting hp':gamestate.players[0].starting_hp,
-                'Round 1 Started':None,
-                'Battle Started':None,
-                'Number of Fights = ':None,
-                'Starting HP: {}'.format(gamestate.players[0].starting_hp):None,
-                'Pets':None,
-                'Pet 1':None,
-                'Pet 2':None,
-                'Pet Name: {}'.format(gamestate.players[0].pet_name):None,
-                'Pet Name: {}'.format(gamestate.players[1].pet_name):None,
-                'Pet Type: ':None,
-                'Current HP: ':None,
+responses = {'Type "0" for command line or "1" for GUI gameplay:':0, 
+                '|------------------------------------------------|':None,
+                '|------------- New Battle Beginning -------------|':None,
+                'Enter the amount of human players for this battle:':1,
+                'Enter the amount of AI players for this battle:':0,
+                'Enter the amount of smart AI players for this battle:':1,
+                'Enter the amount of fights in this battle:':gamestate.num_fights,
+                'Player 1, enter your name:':gamestate.players[0].name,
+                'Enter 1 for "INTELLIGENCE", 2 for "SPEED", or 3 for "POWER"':None,
+                'Player ' + gamestate.players[0].name +', enter your type:':gamestate.players[0].player_type,
+                'Enter the player\'s health':gamestate.players[0].starting_hp,
+                'Enter your pets name:':'Default pet name',
+                'Player 2, enter your name:':gamestate.players[1].name,
+                'Player ' + gamestate.players[1].name + ', enter your type:':gamestate.players[1].player_type,
+                '|-------------- Battle Information --------------|':None,
+                'Jarvis 1:':None,
+                'Player Jarvis 1, enter your type:':gamestate.players[1].player_type,
+                'Amount of fights:  ' + str(gamestate.num_fights):None,
+                'Amount of players: ': None,
+                '|-------------- Fight 1. Beginning --------------|':None,
+                '|-------------------- Round ':None,
                 r'^(\n\r\n)':None,
                 }
 
@@ -36,7 +34,7 @@ expected = list(responses.keys())
 
 # create a piped thread for java process 
 dirname = os.path.dirname(__file__)
-child = popen_spawn.PopenSpawn(['java', '-cp', dirname + '\\bp.jar', "battlepets.GameMain"])
+child = popen_spawn.PopenSpawn(['java', '-cp', dirname + '\\nick_bp.jar', "edu.furbiesfighters.gameplay.Main"])
 
 def game_init():
         init_not_done = True

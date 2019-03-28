@@ -1,35 +1,31 @@
 from pexpect import popen_spawn
 from pexpect import exceptions
+import os
+from gamestate import *
 
-player1_name = 'P1'
-player2_name = 'P2'
-
-
-pet1_name = 'PET1'
-pet2_name = 'PET2'
 
 # responses based on stdout value
-responses = {'Enter a random seed':'1', 
-                'Enter a number of players':'2', 
-                'Enter a number of fights':'1',
-                'Enter the player type for player 1':'2',
-                'Enter the pet type for player 1':'1',
-                'Enter a name for player 1':player1_name,
-                '{}: Enter a name for your pet'.format(player1_name):pet1_name, # if name changes change this line
+responses = {'Enter a random seed':gamestate.seed, 
+                'Enter a number of players':gamestate.num_players, 
+                'Enter a number of fights':gamestate.num_fights,
+                'Enter the player type for player 1':gamestate.players[0].player_type,
+                'Enter the pet type for player 1':gamestate.players[0].pet_type,
+                'Enter a name for player 1':gamestate.players[0].name,
+                '{}: Enter a name for your pet'.format(gamestate.players[0].name):gamestate.players[0].pet_name, # if name changes change this line
                 'Enter the player type for player 2':'2',
                 'Enter the pet type for player 2':'1',
-                'Enter a name for player 2':player2_name,
-                '{}: Enter a name for your pet'.format(player2_name):pet2_name, # if name changes change this line
-                'Enter a starting hp':100,
+                'Enter a name for player 2':gamestate.players[1].name,
+                '{}: Enter a name for your pet'.format(gamestate.players[1].name):gamestate.players[1].pet_name, # if name changes change this line
+                'Enter a starting hp':gamestate.players[0].starting_hp,
                 'Round 1 Started':None,
                 'Battle Started':None,
                 'Number of Fights = ':None,
-                'Starting HP: ':None,
+                'Starting HP: {}'.format(gamestate.players[0].starting_hp):None,
                 'Pets':None,
                 'Pet 1':None,
                 'Pet 2':None,
-                'Pet Name: {}'.format(pet1_name):None,
-                'Pet Name: {}'.format(pet2_name):None,
+                'Pet Name: {}'.format(gamestate.players[0].pet_name):None,
+                'Pet Name: {}'.format(gamestate.players[1].pet_name):None,
                 'Pet Type: ':None,
                 'Current HP: ':None,
                 r'^(\n\r\n)':None,
@@ -39,7 +35,8 @@ responses = {'Enter a random seed':'1',
 expected = list(responses.keys())
 
 # create a piped thread for java process 
-child = popen_spawn.PopenSpawn(['java', '-cp', 'bp.jar', "battlepets.GameMain"])
+dirname = os.path.dirname(__file__)
+child = popen_spawn.PopenSpawn(['java', '-cp', dirname + '\\bp.jar', "battlepets.GameMain"])
 
 def game_init():
         init_not_done = True
@@ -58,15 +55,21 @@ def game_init():
                         if response:
                                 print('Entering: {}'.format(response))
                                 child.write("{}\n".format(response).encode())
+
+                                
+                        if 'Pet Name: PET2' == output:
+                                child.write("{}\n")
                         
+                        if 'Round 1 Started' == output:
+                                return
                         # clear stdout line
-                        child.readline()
+                        child.read_nonblocking(-1,1)
                 
                 # if expect cannot find match
                 # print line
                 except exceptions.TIMEOUT:
-                        line = child.readline()
-                        if not line == b'\r\n':
+                        line = child.read_nonblocking(-1,1)
+                        if not line == b'\r\n' and not line ==  b'':
                                 print(line)
 
 game_init()

@@ -1,0 +1,39 @@
+/**
+ * 
+ */
+package edu.furbiesfighters.gameplay;
+
+import java.util.List;
+
+import edu.furbiesfighters.events.RoundStartEvent;
+
+/**
+ * @author Furbies Fighters
+ *
+ */
+public class GUIFight extends Fight {
+		
+	/**
+	 * Constructor for GUIFight
+	 * @param ref
+	 * @param inName
+	 */
+	public GUIFight(Referee ref, String inName)
+	{
+		super(ref, inName);
+	}
+	
+	/**
+	 * Method for creating a new round. It will also increment round number.
+	 */
+	@Override
+	protected void createNewRound()
+	{
+		RoundStartEvent.RoundStartEventBuilder rsb = new  RoundStartEvent.RoundStartEventBuilder();
+		super.currentRound = new Round(this.ref);
+		super.rounds.add(currentRound);
+		rsb.withRoundNumber(super.rounds.size());
+		RoundStartEvent  rse  = rsb.build();
+		super.ref.addEvent(rse);
+	}
+}

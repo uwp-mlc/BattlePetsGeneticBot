@@ -28,7 +28,7 @@ import javafx.stage.Stage;;
  * Class for maintaining the application.
  * @author Furbies Fighters
  */
-public class Main extends Application
+public class Main
 {
 	private Stage primaryStage;
 	private BorderPane rootLayout;
@@ -39,42 +39,25 @@ public class Main extends Application
 	 */
 	public static void main(String[] args) 
 	{
-		Utility.isGUI = false;
-		String gamePlay = Utility.prompt("Type \"0\" for command line or \"1\" for GUI gameplay: ");
-		if(gamePlay.contentEquals("0"))
-		{
-			BattleController battleController = new BattleController();
-			battleController.play();
-		}
-		else if(gamePlay.contentEquals("1"))
-		{
-			//Probably create some UI game controller. 
-			//Launch main menu window
-			try{
-				launch(args);
-				Utility.isGUI = true;
-			}catch(Exception e) {
-				System.out.println("ERROR " + e.toString());
-			}
-			
-		}
+		BattleController battleController = new BattleController();
+		battleController.play();
 	}
 	
 	/**
 	 * Called when "Launch(args)" is used. Sets up the stage and
 	 * configures content to show on the stage. 
 	 */
-	@Override
-	public void start(Stage primaryStage) throws Exception {
-		// TODO Auto-generated method stub
-		this.primaryStage = primaryStage;
-		//this.primaryStage.setTitle("Enter Players");
-		
-		initRootLayout();
-		
-		showMenu();    //Comment out and uncomment test() to test the gameplay system. 
-		//test();
-	}
+//	@Override
+//	public void start(Stage primaryStage) throws Exception {
+//		// TODO Auto-generated method stub
+//		this.primaryStage = primaryStage;
+//		//this.primaryStage.setTitle("Enter Players");
+//		
+//		initRootLayout();
+//		
+//		showMenu();    //Comment out and uncomment test() to test the gameplay system. 
+//		//test();
+//	}
 	
 	/**
 	 * Set the root layout to the BorderPane. The border pane makes it 

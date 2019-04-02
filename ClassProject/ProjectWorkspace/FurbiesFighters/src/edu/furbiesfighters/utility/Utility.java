@@ -11,7 +11,7 @@ import edu.furbiesfighters.presenters.GamePlayPresenter;
  */
 public class Utility 
 {
-	private static final String BANNER_BORDER = "|------------------------------------------------|";
+	private static final String BANNER_BORDER = "------------------------------------------------";
 	
 	public static boolean isGUI = false;
 	
@@ -167,7 +167,7 @@ public class Utility
 		
 		bannerLength = BANNER_BORDER.length();
 		startIndex = (bannerLength / 2) - (string.length() / 2);
-		stringInBanner = "|";
+		stringInBanner = "";
 		
 		for (int i = 0; i < startIndex - 2; i++)
 		{
@@ -180,7 +180,6 @@ public class Utility
 		{
 			stringInBanner += "-";
 		}
-		stringInBanner += "|";
 		
 		return stringInBanner;
 	}

@@ -1,4 +1,11 @@
 package edu.furbiesfighters.gameplay;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +35,9 @@ public class Battle extends Observable
 	private static final int MINIMUM_PLAYERS = 2;
 	private static final int MINIMUM_FIGHTS = 1;
 	private static final int PLAYER_HEALTH = 100;
+	 
+	private static File file = new File("start.ini");
+	private BufferedReader init_file;
 	
 	protected List<Fight> fightList;
 	protected Referee ref;
@@ -44,6 +54,11 @@ public class Battle extends Observable
 	{
 		fightList = new ArrayList<Fight>();
 		this.ref = new Referee();
+		try {
+			this.init_file = new BufferedReader(new FileReader(file));
+		} catch (FileNotFoundException e) {
+			System.out.println(e.toString());
+		}
 	}
 	
 	/**
@@ -62,39 +77,91 @@ public class Battle extends Observable
 	 * Method to instantiate the variables for the class. It gets all
 	 * the player information, fight information, and prints it out.
 	 */
-	public void setUpBattle()
+	public void setUpBattle(boolean manual)
 	{
-		int aiPlayersNeeded = this.MINIMUM_PLAYERS;
-		int smartAiPlayersNeeded = 0;
+		setupBattleWithFile();
+	}
+	
+//	private void setupBattleManual() {
+//		int aiPlayersNeeded = this.MINIMUM_PLAYERS;
+//		int smartAiPlayersNeeded = 0;
+//		this.ref = new Referee();
+//		this.currentFight = null;
+//		this.fightList = new ArrayList<Fight>();
+//		humanAmount = getHumanAmount();
+//		aiPlayersNeeded -= humanAmount;
+//		if(aiPlayersNeeded < 0)
+//			aiPlayersNeeded = 0;
+//		aiAmount = getAiAmount();
+//		smartAiPlayersNeeded = aiPlayersNeeded - aiAmount;
+//		if(smartAiPlayersNeeded < 0)
+//			smartAiPlayersNeeded = 0;
+//		smartAiPlayersNeeded = getSmartAiAmount(smartAiPlayersNeeded);
+//		this.smartAiAmount = smartAiPlayersNeeded;
+//		fightAmount = getFightAmount();
+//		
+//		Utility.printEndline();
+//
+//		getAllAIPlayerInformation();
+//		getAllSmartAIPlayerInformation();
+//		getAllHumanPlayerInformation();
+//		setFights();
+//		
+//		announceBattleInformation();
+//	}
+	private void setupBattleWithFile() {
 		this.ref = new Referee();
 		this.currentFight = null;
 		this.fightList = new ArrayList<Fight>();
-		humanAmount = getHumanAmount();
-		aiPlayersNeeded -= humanAmount;
-		if(aiPlayersNeeded < 0)
-			aiPlayersNeeded = 0;
-		aiAmount = getAiAmount();
-		smartAiPlayersNeeded = aiPlayersNeeded - aiAmount;
-		if(smartAiPlayersNeeded < 0)
-			smartAiPlayersNeeded = 0;
-		smartAiPlayersNeeded = getSmartAiAmount(smartAiPlayersNeeded);
-		this.smartAiAmount = smartAiPlayersNeeded;
-		fightAmount = getFightAmount();
 		
-		Utility.printEndline();
+		try 
+		{
+			String line = readLine();
+			this.humanAmount = Integer.parseInt(line);
+			
+			line = readLine();
+			this.aiAmount = Integer.parseInt(line);
+			
+			line = readLine();
+			this.smartAiAmount = Integer.parseInt(line);
+			
+			line = readLine();
+			this.fightAmount = Integer.parseInt(line);
+			
+			getAllAIPlayerInformation();
+			getAllSmartAIPlayerInformation();
+			getAllHumanPlayerInformation();
+		}
+		catch(FileNotFoundException e)
+		{
+			System.out.println("ERROR: " + e.toString());
+		}
+		catch(IOException e)
+		{
+			System.out.println("ERROR: " + e.toString());
+		}
+		catch(NumberFormatException e)
+		{
+			System.out.println("ERROR: " + e.toString());
+		}
 
-		getAllAIPlayerInformation();
-		getAllSmartAIPlayerInformation();
-		getAllHumanPlayerInformation();
 		setFights();
-		
-		announceBattleInformation();
 	}
 	
 	/**
 	 * Method for playing the battle. It will iterate through each fight
 	 * until the end of the battle.
+	 * @throws IOException 
 	 */
+	
+	private String readLine() throws IOException {
+		String line = this.init_file.readLine();
+		while(line.isEmpty()) {
+			line = this.init_file.readLine();
+		}
+		return line.split(" //")[0];
+	}
+	
 	public void playBattle()
 	{
 		AIPlayer.resetAICount();
@@ -121,7 +188,7 @@ public class Battle extends Observable
 			FightStartEvent.FightStartEventBuilder fsb = new FightStartEvent.FightStartEventBuilder();
 			currentFight = fightList.get(i);
 			fsb.withFightNumber(i);
-			Utility.printLargeBanner(currentFight.getName() + ". Beginning");
+			//Utility.printLargeBanner(currentFight.getName() + ". Beginning");
 			fsb.withPlayerEventInfo(peL); 
 			this.ref.addEvent(fsb.build());
 			currentFight.playFight();
@@ -263,8 +330,10 @@ public class Battle extends Observable
 	 * Method for getting all the player information. It will loop for the
 	 * playerAmount, ask for the player information, and instantiate the
 	 * player's information.
+	 * @throws IOException 
+	 * @throws NumberFormatException 
 	 */
-	private void getAllHumanPlayerInformation()
+	private void getAllHumanPlayerInformation() throws NumberFormatException, IOException
 	{
 		String playerName;
 		String petName;
@@ -276,12 +345,10 @@ public class Battle extends Observable
 		for (int i = 0; i < humanAmount; i++)
 		{
 			playerIndex = i + 1;
-			playerName = getPlayerName(playerIndex);
+			playerName = readLine();
 			playerType = getPlayerType(playerName);
-			playerHealth = getPlayerHealth();
-			petName = getPetName();
-			
-			Utility.printEndline();
+			playerHealth = Integer.parseInt(readLine());
+			petName = readLine();
 			
 			player = new Human(playerHealth, playerName, petName, playerType);
 			
@@ -295,8 +362,9 @@ public class Battle extends Observable
 	 * Method for getting all the player information. It will loop for the
 	 * playerAmount, ask for the player information, and instantiate the
 	 * player's information.
+	 * @throws IOException 
 	 */
-	private void getAllAIPlayerInformation()
+	private void getAllAIPlayerInformation() throws IOException
 	{
 		String playerName;
 		String petName;
@@ -307,12 +375,10 @@ public class Battle extends Observable
 		for (int i = 0; i < aiAmount; i++)
 		{
 			playerName = "AI Player " + (i + 1);
-			Utility.printMessage(playerName + ":");
-			playerType = getPlayerType(playerName);
-			playerHealth = getPlayerHealth();
-			petName = getPetName();
 			
-			Utility.printEndline();
+			playerType = getPlayerType(playerName);
+			playerHealth = Integer.parseInt(readLine());
+			petName = readLine();
 			
 			player = new AIPlayer(playerHealth, playerName, petName, playerType);
 			
@@ -324,8 +390,10 @@ public class Battle extends Observable
 	 * Method for getting all the player information. It will loop for the
 	 * playerAmount, ask for the player information, and instantiate the
 	 * player's information.
+	 * @throws IOException 
+	 * @throws NumberFormatException 
 	 */
-	private void getAllSmartAIPlayerInformation()
+	private void getAllSmartAIPlayerInformation(/*String[] values*/) throws NumberFormatException, IOException
 	{
 		String playerName;
 		String petName;
@@ -336,10 +404,9 @@ public class Battle extends Observable
 		for (int i = 0; i < this.smartAiAmount; i++)
 		{
 			playerName = "Jarvis " + (i + 1);
-			Utility.printMessage(playerName + ":");
 			playerType = getPlayerType(playerName);
-			playerHealth = getPlayerHealth();
-			petName = getPetName();
+			playerHealth = Integer.parseInt(readLine());
+			petName = readLine();
 			
 			Utility.printEndline();
 			
@@ -348,96 +415,97 @@ public class Battle extends Observable
 			this.ref.addPlayer(player);
 		}
 	}
+//	
+//	/**
+//	 * Get health
+//	 * @return
+//	 */
+//	private int getPlayerHealth()
+//	{
+//		String unformattedSeed;
+//		int formattedSeed;
+//		
+//		unformattedSeed = Utility.prompt("Enter the player's health");
+//		
+//		while (!Utility.isValidIntegerAmount(unformattedSeed, 0))
+//		{
+//			unformattedSeed = Utility.prompt("Enter a valid integer health:");
+//		}
+//		
+//		formattedSeed = Integer.parseInt(unformattedSeed);
+//		
+//		return formattedSeed;
+//	}
 	
-	/**
-	 * Get health
-	 * @return
-	 */
-	private int getPlayerHealth()
-	{
-		String unformattedSeed;
-		int formattedSeed;
-		
-		unformattedSeed = Utility.prompt("Enter the player's health");
-		
-		while (!Utility.isValidIntegerAmount(unformattedSeed, 0))
-		{
-			unformattedSeed = Utility.prompt("Enter a valid integer health:");
-		}
-		
-		formattedSeed = Integer.parseInt(unformattedSeed);
-		
-		return formattedSeed;
-	}
+//	/**
+//	 * Method for getting the player name. It will check to see if the
+//	 * player's name is valid.
+//	 * @param playerIndex - the index used to address the player.
+//	 * @return playerName, the name of the player.
+//	 */
+//	private String getPlayerName(int playerIndex)
+//	{
+//		String playerName;
+//		boolean isValid;
+//		
+//		playerName = "";
+//		isValid = false;
+//		
+//		playerName = Utility.prompt("Player " + (playerIndex) + ", enter your name:");
+//		
+//		while (!isValid)
+//		{
+//			if (playerName.length() != 0)
+//			{
+//				isValid = true;
+//			}
+//			else
+//			{
+//				playerName = Utility.prompt("Player " + (playerIndex) + ", enter a valid name:");
+//			}
+//		}
+//		
+//		return playerName;
+//	}
 	
-	/**
-	 * Method for getting the player name. It will check to see if the
-	 * player's name is valid.
-	 * @param playerIndex - the index used to address the player.
-	 * @return playerName, the name of the player.
-	 */
-	private String getPlayerName(int playerIndex)
-	{
-		String playerName;
-		boolean isValid;
-		
-		playerName = "";
-		isValid = false;
-		
-		playerName = Utility.prompt("Player " + (playerIndex) + ", enter your name:");
-		
-		while (!isValid)
-		{
-			if (playerName.length() != 0)
-			{
-				isValid = true;
-			}
-			else
-			{
-				playerName = Utility.prompt("Player " + (playerIndex) + ", enter a valid name:");
-			}
-		}
-		
-		return playerName;
-	}
-	
-	/**
-	 * Method for getting the pet name. It will check to see if the pet
-	 * name is valid.
-	 * @return petName, the name of the player's pet.
-	 */
-	private String getPetName()
-	{
-		String playerName;
-		boolean isValid;
-		
-		playerName = "";
-		isValid = false;
-		
-		playerName = Utility.prompt("Enter your pets name:");
-		
-		while (!isValid)
-		{			
-			if (playerName.length() != 0)
-			{
-				isValid = true;
-			}
-			else
-			{
-				playerName = Utility.prompt("Enter a valid pet name:");
-			}
-		}
-		
-		return playerName;
-	}
+//	/**
+//	 * Method for getting the pet name. It will check to see if the pet
+//	 * name is valid.
+//	 * @return petName, the name of the player's pet.
+//	 */
+//	private String getPetName()
+//	{
+//		String playerName;
+//		boolean isValid;
+//		
+//		playerName = "";
+//		isValid = false;
+//		
+//		playerName = Utility.prompt("Enter your pets name:");
+//		
+//		while (!isValid)
+//		{			
+//			if (playerName.length() != 0)
+//			{
+//				isValid = true;
+//			}
+//			else
+//			{
+//				playerName = Utility.prompt("Enter a valid pet name:");
+//			}
+//		}
+//		
+//		return playerName;
+//	}
 	
 	/**
 	 * Method for getting the player's type. It will check to see if
 	 * the type is valid.
 	 * @param playerName - the name of the player to be addressed.
 	 * @return playerType, the type of pet the player wants.
+	 * @throws IOException 
 	 */
-	private PetTypes getPlayerType(String playerName)
+	private PetTypes getPlayerType(String playerName) throws IOException
 	{
 		String playerSelection;
 		PetTypes playerType;
@@ -446,8 +514,7 @@ public class Battle extends Observable
 		
 		while (playerType == null)
 		{
-			playerSelection = Utility.prompt("Enter 1 for \"INTELLIGENCE\", 2 for \"SPEED\", or 3 for \"POWER\""
-					+ "\n" + "Player " + playerName + ", enter your type:");
+			playerSelection = readLine();
 			
 			switch(playerSelection)
 			{

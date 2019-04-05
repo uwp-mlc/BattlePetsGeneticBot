@@ -1,5 +1,8 @@
 package edu.furbiesfighters.gameplay;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 import edu.furbiesfighters.players.AIPlayer;
@@ -39,8 +42,23 @@ public class Main
 	 */
 	public static void main(String[] args) 
 	{
+//		File file = new File("start.ini");
+//		BufferedReader init_file;
+//		try {
+//		init_file = new BufferedReader(new FileReader(file));
+//		String line = init_file.readLine().split(" //")[0];
+//		while(line != null) {
+//			System.out.println(line);
+//			line = init_file.readLine().split(" //")[0];
+//		}
+//		}
+//		catch(Exception e) {
+//			System.out.println(e.toString());
+//		}
 		BattleController battleController = new BattleController();
-		battleController.play();
+		String load_file = "";
+		battleController.play(true);
+		
 	}
 	
 	/**

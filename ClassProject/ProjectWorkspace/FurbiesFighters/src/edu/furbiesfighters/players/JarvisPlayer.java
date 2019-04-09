@@ -55,6 +55,7 @@ public class JarvisPlayer  extends Player {
 	public Skills chooseSkill()
 	{
 		Utility.printMessage("Jarvis is choosing their skill");
+		
 		return learnSkill();
 	}
 

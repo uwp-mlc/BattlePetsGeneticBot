@@ -65,9 +65,9 @@ public class Utility
 		}
 		else 
 		{
-			System.out.println();
-			System.out.println(convertedMessage);
-			System.out.println();
+			//System.out.println();
+			//System.out.println(convertedMessage);
+			//System.out.println();
 		}
 	}
 	
@@ -79,11 +79,11 @@ public class Utility
 		if(Utility.isGUI && presenter != null)
 		{
 			//Utility.gp.getTxtOutput().setText("add to the text");
-			Utility.presenter.setConsoleText("\n");
+			//Utility.presenter.setConsoleText("\n");
 		}
 		else 
 		{
-			System.out.println();
+			//System.out.println();
 		}
 	}
 	
@@ -100,7 +100,7 @@ public class Utility
 		}
 		else 
 		{
-			System.out.println(message);
+			//System.out.println(message);
 		}
 	}
 	
@@ -114,7 +114,7 @@ public class Utility
 	{
 		String answer;
 		
-		System.out.print(promptMessage + " ");
+		//System.out.print(promptMessage + " ");
 		
 		answer = stdin.nextLine();
 		

@@ -16,18 +16,22 @@
 			<item value="1"/>
 			<item value="1"/>
 			<item value="1"/>
+			<item value="1"/>
 		</list>
 		<list key="orderedElements">
+			<item value="org.eclipse.ui.preferencePages.ColorsAndFonts"/>
 			<item value="org.eclipse.debug.ui.VariableView"/>
 			<item value="org.eclipse.ui.views.ContentOutline"/>
 			<item value="org.eclipse.wst.jsdt.ui.preferences.CodeTemplatePreferencePage"/>
 		</list>
 		<list key="orderedProviders">
+			<item value="org.eclipse.ui.preferences"/>
 			<item value="org.eclipse.e4.ui.parts"/>
 			<item value="org.eclipse.e4.ui.parts"/>
 			<item value="org.eclipse.ui.preferences"/>
 		</list>
 		<list key="textArray">
+			<item value="theme"/>
 			<item value="variables"/>
 			<item value="outline"/>
 			<item value="function"/>

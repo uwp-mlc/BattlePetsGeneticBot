@@ -1,70 +1,48 @@
 from pexpect import popen_spawn
-from pexpect import exceptions
+import sys
+from io import BufferedWriter
 import os
+import json
+import random
 from gamestate import *
-
-
-# responses based on stdout value
-responses = {#'Type "0" for command line or "1" for GUI gameplay:':0, 
-                '------------------------------------------------\r\n':None,
-                '------------ New Battle Beginning ------------\r\n':None,
-                'Enter the amount of human players for this battle: ':1,
-                'Enter the amount of AI players for this battle: ':0,
-                'Enter the amount of smart AI players for this battle: ':1,
-                'Enter the amount of fights in this battle: ':gamestate.num_fights,
-                # 'Player 1, enter your name:':gamestate.players[0].name,
-                # 'Enter 1 for "INTELLIGENCE", 2 for "SPEED", or 3 for "POWER"':None,
-                # 'Player ' + gamestate.players[0].name +', enter your type:':gamestate.players[0].player_type,
-                # 'Enter the player\'s health':gamestate.players[0].starting_hp,
-                # 'Enter your pets name:':'Default pet name',
-                # 'Player 2, enter your name:':gamestate.players[1].name,
-                # 'Player ' + gamestate.players[1].name + ', enter your type:':gamestate.players[1].player_type,
-                # '|-------------- Battle Information --------------|':None,
-                # 'Jarvis 1:':None,
-                # 'Player Jarvis 1, enter your type:':gamestate.players[1].player_type,
-                # 'Amount of fights:  ' + str(gamestate.num_fights):None,
-                # 'Amount of players: ': None,
-                # '|-------------- Fight 1. Beginning --------------|':None,
-                # '|-------------------- Round ':None,
-                r'^(\r\n)':None,
-                }
-
-# pexpect list, this is a list of keys from the reponses dictionary
-expected = list(responses.keys())
 
 # create a piped thread for java process 
 dirname = os.path.dirname(__file__)
-child = popen_spawn.PopenSpawn(['java', '-cp', dirname + '\\working_bp.jar',"edu.furbiesfighters.gameplay.Main"])
-def game_init():
-        init_not_done = True
-        while init_not_done:
-                try:
-                        
-                        # index of expected string
-                        expected_index = child.expect(expected,timeout=1)
-                        output = expected[expected_index]
-                        #if not output == r'^(\n\r\n)':
-                        print(output)
-                                
-                        # get response from dictionary through list index
-                        response = responses[expected[expected_index]]
-                        
-                        # write response
-                        if response != None:
-                                print('Entering: {}'.format(response))
-                                child.send("{}\n".format(response).encode())
-                        # clear stdout line
-                # if expect cannot find match
-                # print line
-                except exceptions.TIMEOUT:
-                        line = child.readlines()
-                        if not line == b'\r\n' and not line ==  b'':
-                                print(line)
+child = popen_spawn.PopenSpawn(['java', '-cp', 'working_bp.jar', 'edu.furbiesfighters.gameplay.Main'])
 
-game_init()
 
-def send_att():
-        child.write("{}\n".format('1').encode())
+print(child.readline())
+
+child.sendline("1\r\n".encode('UTF-8'))
+
+print("1\r\n".encode('UTF-8').decode('UTF-8'))
+json_string = child.readline()
+print(str(json_string)[2:-5])
+
+state = json.loads(str(json_string)[2:-5])
+print(state["Jarvis 1"]["current_health"])
+my_hp = state["P1_NAME"]["current_health"]
+opp_hp = state["Jarvis 1"]["current_health"]
+next_att = 1
+while(my_hp > 0 and opp_hp > 0):
+        child.stdin.flush()
+        if(next_att == 3):
+                next_att = 1
+        next_att += 1
+        child.sendline("{}\r\n".format(next_att).encode('UTF-8'))
+        json_string = child.readline()
+        state = json.loads(str(json_string)[2:-5])
+        my_hp = state["P1_NAME"]["current_health"]
+        opp_hp = state["Jarvis 1"]["current_health"]
+
+print(state)
+print("my_hp: {} opp_hp: {}".format(my_hp,opp_hp))
+
+for line in iter(child.proc.stdout.readline, b''):
+        print(line)
+
+def send_att(child):
+        child.sendline("1")
         print(child.readline())
 
-send_att()
+send_att(child)

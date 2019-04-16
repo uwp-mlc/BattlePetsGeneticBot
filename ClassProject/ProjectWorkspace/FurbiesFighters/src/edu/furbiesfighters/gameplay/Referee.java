@@ -116,8 +116,9 @@ public class Referee extends Observable
 									+ "\"conditional_damage\" : " + damage.getConditional() + " },";
 		}
 		jsonString = jsonString.substring(0,jsonString.length()-1);
-		jsonString += "}\n";
-		//Utility.printMessage(jsonString);
+		jsonString += "}\r\n";
+		//System.out.printf(jsonString);
+		//System.out.printf("Other Thing");
 		System.out.printf(jsonString, alivePlayables.get(0).getCurrentHp(), alivePlayables.get(1).getCurrentHp());
 		//print json string
 	}

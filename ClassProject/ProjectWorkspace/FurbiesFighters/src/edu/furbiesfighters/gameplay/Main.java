@@ -55,6 +55,7 @@ public class Main
 //		catch(Exception e) {
 //			System.out.println(e.toString());
 //		}
+		System.out.println("start");
 		BattleController battleController = new BattleController();
 		String load_file = "";
 		battleController.play(true);

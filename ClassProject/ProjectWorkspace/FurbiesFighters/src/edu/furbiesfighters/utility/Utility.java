@@ -18,7 +18,7 @@ public class Utility
 	
 	private static GamePlayPresenter presenter = null;
 	
-	private static Scanner stdin = new Scanner(System.in);
+	private static Scanner stdin = new Scanner(System.in); 
 	
 	private static Referee ref;
 		
@@ -97,6 +97,7 @@ public class Utility
 		{
 			//Utility.gp.getTxtOutput().setText("add to the text");
 			Utility.presenter.setConsoleText(message + "\n");
+			
 		}
 		else 
 		{
@@ -115,9 +116,7 @@ public class Utility
 		String answer;
 		
 		//System.out.print(promptMessage + " ");
-		
 		answer = stdin.nextLine();
-		
 		return answer;
 	}
 	

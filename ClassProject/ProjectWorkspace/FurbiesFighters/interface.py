@@ -38,11 +38,14 @@ while(my_hp > 0 and opp_hp > 0):
 print(state)
 print("my_hp: {} opp_hp: {}".format(my_hp,opp_hp))
 
-for line in iter(child.proc.stdout.readline, b''):
-        print(line)
 
-def send_att(child):
-        child.sendline("1")
-        print(child.readline())
+def sendAttack(attackArr):
+        attackIndex = attackArr.index(max(attackArr))
+        attackIndex += 1
 
-send_att(child)
+        if(attackIndex > 4):
+                child.sendline("{}\r\n".format(5).encode('UTF-8'))
+                child.sendline("{}\r\n".format(attackIndex - 4).encode('UTF-8'))
+        else:
+                child.sendline("{}\r\n".format(attackIndex).encode('UTF-8'))
+

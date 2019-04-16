@@ -33,7 +33,7 @@ public class BattleController
 	 * play as many battles as they would like. It will announce each
 	 * battle and announce the end of the game.
 	 */
-	public void play()
+	public void play(boolean manual)
 	{
 		boolean keepPlaying;
 		
@@ -41,11 +41,10 @@ public class BattleController
 		
 		while (keepPlaying)
 		{
-			Utility.printLargeBanner("New Battle Beginning");
 			
 			this.ref = new Referee();
 			currentBattle = new Battle();
-			currentBattle.setUpBattle();
+			currentBattle.setUpBattle(manual);
 			currentBattle.playBattle();
 			
 			String winningString = "The following player(s) won the battle: ";

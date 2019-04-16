@@ -1,4 +1,5 @@
 package edu.furbiesfighters.utility;
+import java.io.*;
 import java.util.Scanner;
 
 import edu.furbiesfighters.gameplay.Referee;
@@ -17,7 +18,7 @@ public class Utility
 	
 	private static GamePlayPresenter presenter = null;
 	
-	private static Scanner stdin = new Scanner(System.in);
+	private static Scanner stdin = new Scanner(System.in); 
 	
 	private static Referee ref;
 		
@@ -64,9 +65,9 @@ public class Utility
 		}
 		else 
 		{
-			System.out.println();
-			System.out.println(convertedMessage);
-			System.out.println();
+			//System.out.println();
+			//System.out.println(convertedMessage);
+			//System.out.println();
 		}
 	}
 	
@@ -78,11 +79,11 @@ public class Utility
 		if(Utility.isGUI && presenter != null)
 		{
 			//Utility.gp.getTxtOutput().setText("add to the text");
-			Utility.presenter.setConsoleText("\n");
+			//Utility.presenter.setConsoleText("\n");
 		}
 		else 
 		{
-			System.out.println();
+			//System.out.println();
 		}
 	}
 	
@@ -96,10 +97,11 @@ public class Utility
 		{
 			//Utility.gp.getTxtOutput().setText("add to the text");
 			Utility.presenter.setConsoleText(message + "\n");
+			
 		}
 		else 
 		{
-			System.out.println(message);
+			//System.out.println(message);
 		}
 	}
 	
@@ -113,10 +115,8 @@ public class Utility
 	{
 		String answer;
 		
-		System.out.print(promptMessage + " ");
-		
+		//System.out.print(promptMessage + " ");
 		answer = stdin.nextLine();
-		
 		return answer;
 	}
 	
@@ -188,5 +188,4 @@ public class Utility
 	{
 		Utility.presenter = presenter;
 	}
-
 }

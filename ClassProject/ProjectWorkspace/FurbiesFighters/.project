@@ -14,4 +14,10 @@
 	<natures>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>start</name>
+			<value>file:/D:/Python%20Programs/BattlePets%20Bot/BattlePetsGeneticBot/ClassProject/ProjectWorkspace/FurbiesFighters/src/edu/furbiesfighters/gameplay/start.ini</value>
+		</variable>
+	</variableList>
 </projectDescription>

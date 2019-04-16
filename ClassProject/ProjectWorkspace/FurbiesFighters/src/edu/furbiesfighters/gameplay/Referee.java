@@ -68,6 +68,10 @@ public class Referee extends Observable
 		List<Playable> alivePlayables = this.getAlivePlayables();
 		double opponentHP;
 		
+		//start json object
+		String jsonString = "{";
+		
+		
 		/* Loop that calculates and deals damage for each non-sleeping player */
 		for (int i = 0; i < alivePlayables.size(); i++)
 		{
@@ -93,10 +97,6 @@ public class Referee extends Observable
 			if(playableSkill == Skills.REVERSAL_OF_FORTUNE)
 				this.randomDifference.put(playable, 0.0);
 			
-			Utility.printMessage(playable.getPlayerName()  +" dealt " + damage.getRandom() 
-				+ " random damage and " + damage.getConditional() 
-				+ " conditional damage on " + nextPlayable.getPlayerName()
-				+ " with skill " + playableSkill.toString());
 
 			super.setChanged();
 			AttackEvent ae = aeb.withAttackingPlayerIndex(this.getIndexOfPlayable(playable))
@@ -107,7 +107,20 @@ public class Referee extends Observable
 			super.notifyObservers(ae);
 			
 			nextPlayable.updateHp(damage.getConditional() + damage.getRandom());
+			
+			//add to json for this skill health, rand, cond, 
+			jsonString += " \"" + playable.getPlayerName() 
+							+ "\" : { \"last_skill\" : \"" + playableSkill.toString() + "\","
+									+ "\"current_health\" : %f ," 
+									+ "\"random_damage\" : " + damage.getRandom() + ","
+									+ "\"conditional_damage\" : " + damage.getConditional() + " },";
 		}
+		jsonString = jsonString.substring(0,jsonString.length()-1);
+		jsonString += "}\r\n";
+		//System.out.printf(jsonString);
+		//System.out.printf("Other Thing");
+		System.out.printf(jsonString, alivePlayables.get(0).getCurrentHp(), alivePlayables.get(1).getCurrentHp());
+		//print json string
 	}
 	
 	/**

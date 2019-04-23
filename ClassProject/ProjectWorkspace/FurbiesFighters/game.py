@@ -12,7 +12,7 @@ class Game():
     def __del__(self):
         self.child.proc.terminate()
     def sendAttack(self, attackArr):
-        cooldowns = list(self.gamestate.p1_cooldowns.values())
+        cooldowns = list(self.gamestate.me_cooldowns.values())
         for i, cooldown in enumerate(cooldowns):
             if cooldown != 0:
                 if i == 4:
@@ -34,11 +34,11 @@ class Game():
 
         self.gamestate.remember_turn(round_info)
 
-        if self.gamestate.p1_health <= 0 or self.gamestate.p2_health <= 0:
+        if self.gamestate.me_health <= 0 or self.gamestate.op_health <= 0:
             self.game_finished = True
 
     def get_fitness(self):
-        return self.gamestate.p1_health - self.gamestate.p2_health
+        return self.gamestate.me_health - self.gamestate.op_health
 
     def get_net_data(self):
         return self.gamestate.get_net_data()

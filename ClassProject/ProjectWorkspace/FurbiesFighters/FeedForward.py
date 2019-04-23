@@ -3,6 +3,7 @@
 """
 
 from __future__ import print_function
+from game import Game
 import os
 import neat
 
@@ -22,10 +23,12 @@ xor_outputs = [   (0.0,),     (1.0,),     (1.0,),     (0.0,)]
 def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
         # Play the game
-        while not game_finished:
+        net = neat.nn.FeedForwardNetwork.create(genome, config)
+        gameInstance = Game()
+        while not gameInstance.game_finished:
             # Output game inputs
-            net.activate(game_inputs)
-
+            net.activate(gameInstance.get_net_data())
+        genome.fitness = gameInstance.get_fitness()
         # Evaluate fitness
         # genome.fitness = 4.0
         # net = neat.nn.FeedForwardNetwork.create(genome, config)

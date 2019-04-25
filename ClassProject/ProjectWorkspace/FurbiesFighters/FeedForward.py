@@ -27,7 +27,8 @@ def eval_genomes(genomes, config):
         gameInstance = Game()
         while not gameInstance.game_finished:
             # Output game inputs
-            net.activate(gameInstance.get_net_data())
+            attack = net.activate(gameInstance.get_net_data())
+            gameInstance.sendAttack(attack)
         genome.fitness = gameInstance.get_fitness()
         # Evaluate fitness
         # genome.fitness = 4.0
@@ -60,13 +61,13 @@ def run(config_file):
 
     # Show output of the most fit genome against training data.
     print('\nOutput:')
-    winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
-    for xi, xo in zip(xor_inputs, xor_outputs):
-        output = winner_net.activate(xi)
-        print("input {!r}, expected output {!r}, got {!r}".format(xi, xo, output))
+    # winner_net = neat.nn.FeedForwardNetwork.create(winner, config)
+    # for xi, xo in zip(xor_inputs, xor_outputs):
+    #     output = winner_net.activate(xi)
+    #     print("input {!r}, expected output {!r}, got {!r}".format(xi, xo, output))
 
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-4')
-    p.run(eval_genomes, 10)
+    # p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-4')
+    # p.run(eval_genomes, 10)
 
 
 if __name__ == '__main__':

@@ -4,13 +4,14 @@ import json
 
 
 class GameState:
-  TYPES = ['speed','power','intelligence']  # might be caps?
-  SKILLS = ['rock throw','paper cut','scissor poke','shoot the moon','reversal of fortune']
-  FLATTEN = lambda l: [item for sublist in l for item in sublist]
+  TYPES = {'speed':1,'power':2,'intelligence':3}  # might be caps?
+  SKILLS = ['rock throw','scissor poke','paper cut','shoot the moon','reversal of fortune']
+  
   def __init__(self, me_type, op_type):
+    self.FLATTEN = lambda l: [item for sublist in l for item in sublist]
     self.me_cooldowns = {"rock throw":0,
-                          "paper cut":0,
                           "scissor poke":0,
+                          "paper cut":0,
                           "shoot the moon":0,
                           "reversal of fortune":0}
     self.me_health = 100
@@ -58,15 +59,14 @@ class GameState:
     '''
     net_data = []
     self._to_catagorical
-    net_data.append(self._to_catagorical(self.TYPES,self.op_player_type))
-    net_data.append(self._to_catagorical(self.TYPES,self.me_player_type))
-    net_data.append(self.me_cooldowns.values())
-    net_data.append(self.op_cooldowns.values())
+    net_data.append(self._to_catagorical(list(self.TYPES.values()),self.op_player_type))
+    net_data.append(self._to_catagorical(list(self.TYPES.values()),self.me_player_type))
+    net_data.append(list(self.me_cooldowns.values()))
+    net_data.append(list(self.op_cooldowns.values()))
     net_data.append(self._to_catagorical(self.SKILLS,self.me_last_skill))
     net_data.append(self._to_catagorical(self.SKILLS,self.op_last_skill))
-    net_data.append(self.me_health)
-    net_data.append(self.op_health)
-
+    net_data.append([self.me_health])
+    net_data.append([self.op_health])
     return self.FLATTEN(net_data)
 
 
@@ -99,7 +99,8 @@ class GameState:
   def _to_catagorical(self, arr, val):
 
     return_arr = [0] * len(arr)
-
+    if val == None:
+      return return_arr
     for i in range(len(arr)):
 
       if arr[i] == val:
@@ -108,7 +109,7 @@ class GameState:
 
         return return_arr
 
-    raise ValueError('Value was not found in given array!')
+    raise ValueError('Value was not found in given array!' + '\nArray: ' + str(arr) + '\nValue: '+ val)
 
 
 '''

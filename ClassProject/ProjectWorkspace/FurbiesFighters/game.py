@@ -7,8 +7,10 @@ class Game():
     def __init__(self):
         dirname = os.path.dirname(__file__)
         self.child = popen_spawn.PopenSpawn(['java', '-cp', 'working_bp.jar', 'edu.furbiesfighters.gameplay.Main'])
-        self.gamestate = GameState()
+        self.gamestate = GameState(1,1)
         self.game_finished = False
+        # Remove 'Start' string
+        self.child.readline()
     def __del__(self):
         self.child.proc.terminate()
     def sendAttack(self, attackArr):
@@ -29,7 +31,6 @@ class Game():
                 self.child.sendline("{}\r\n".format(attackIndex).encode('UTF-8'))
 
         json_string = self.child.readline()
-
         round_info = json.loads(str(json_string)[2:-5])
 
         self.gamestate.remember_turn(round_info)
@@ -41,4 +42,4 @@ class Game():
         return self.gamestate.me_health - self.gamestate.op_health
 
     def get_net_data(self):
-        return self.gamestate.get_input_data()
+        return self.gamestate.get_net_data()

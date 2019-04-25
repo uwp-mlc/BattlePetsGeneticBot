@@ -12,7 +12,8 @@ class gameStateInstance:
 	oppLastAtt2: int
 	oppLastAtt3: int
 	oppLastAtt4: int
-	oppDmg: float
+	oppCondDmg: float
+	oppRandDmg: float
 	oppHealth: float
 	selfTypePower: int
 	selfTypeInt: int

@@ -41,4 +41,4 @@ class Game():
         return self.gamestate.me_health - self.gamestate.op_health
 
     def get_net_data(self):
-        return self.gamestate.get_net_data()
+        return self.gamestate.get_input_data()

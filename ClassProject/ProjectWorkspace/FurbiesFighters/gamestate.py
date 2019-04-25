@@ -84,6 +84,20 @@ obj = json.loads("{ \"Jarvis 1\" : { \"last_skill\" : \"rock throw\",\"current_h
 print(gamestate.remember_turn(obj)[1])
 '''
 
+def _to_catagorical(self, arr, val):
+
+  return_arr = [0] * len(arr)
+
+  for i in range(len(arr)):
+
+    if arr[i] == val:
+
+      return_arr[i] = 1
+
+      return return_arr
+
+  raise ValueError('Value was not found in given array!')
+
 # PER PLAYER
 # health
 # last attack

@@ -1,7 +1,12 @@
 from player import Player
 import json
 
+
+
 class GameState:
+  TYPES = ['speed','power','intelligence']  # might be caps?
+  SKILLS = ['rock throw','paper cut','scissor poke','shoot the moon','reversal of fortune']
+  FLATTEN = lambda l: [item for sublist in l for item in sublist]
   def __init__(self, me_type, op_type):
     self.me_cooldowns = {"rock throw":0,
                           "paper cut":0,
@@ -37,18 +42,33 @@ class GameState:
     self.me_cooldowns[state["P1_NAME"]["last_skill"]] = self.get_generic_skill_recharge(self.me_last_skill)
     self.me_health = state["P1_NAME"]["current_health"]
     self.me_last_random = state["P1_NAME"]["random_damage"]
-    #......
+    self.me_last_conditional = state["P1_NAME"]["conditional_damage"]
 
     self.op_last_skill = state["Jarvis 1"]["last_skill"]
     self.op_cooldowns[state["Jarvis 1"]["last_skill"]] = self.get_generic_skill_recharge(self.op_last_skill)
     self.op_health = state["Jarvis 1"]["current_health"]
-
+    self.op_last_random = state["Jarvis 1"]["random_damage"]
+    self.op_last_conditional = state["Jarvis 1"]["conditional_damage"]
     #return ([self.me_cooldowns[x] for x in self.me_cooldowns], [self.op_cooldowns[x] for x in self.op_cooldowns])
 
 
-  def get_input_data(self):
+  def get_net_data(self):
     '''
+    Generate an array of the game state for all input values
     '''
+    net_data = []
+    self._to_catagorical
+    net_data.append(self._to_catagorical(self.TYPES,self.op_player_type))
+    net_data.append(self._to_catagorical(self.TYPES,self.me_player_type))
+    net_data.append(self.me_cooldowns.values())
+    net_data.append(self.op_cooldowns.values())
+    net_data.append(self._to_catagorical(self.SKILLS,self.me_last_skill))
+    net_data.append(self._to_catagorical(self.SKILLS,self.op_last_skill))
+    net_data.append(self.me_health)
+    net_data.append(self.op_health)
+
+    return self.FLATTEN(net_data)
+
 
   def decrement_recharge_times(self):
     '''
@@ -76,6 +96,21 @@ class GameState:
 
     return 1
 
+  def _to_catagorical(self, arr, val):
+
+    return_arr = [0] * len(arr)
+
+    for i in range(len(arr)):
+
+      if arr[i] == val:
+
+        return_arr[i] = 1
+
+        return return_arr
+
+    raise ValueError('Value was not found in given array!')
+
+
 '''
 gamestate = GameState()
 
@@ -83,20 +118,6 @@ obj = json.loads("{ \"Jarvis 1\" : { \"last_skill\" : \"rock throw\",\"current_h
 
 print(gamestate.remember_turn(obj)[1])
 '''
-
-def _to_catagorical(self, arr, val):
-
-  return_arr = [0] * len(arr)
-
-  for i in range(len(arr)):
-
-    if arr[i] == val:
-
-      return_arr[i] = 1
-
-      return return_arr
-
-  raise ValueError('Value was not found in given array!')
 
 # PER PLAYER
 # health

@@ -6,6 +6,8 @@ from __future__ import print_function
 from game import Game
 import os
 import neat
+import gzip, pickle
+from neat.six_util import iteritems, itervalues
 
 # 2-input XOR inputs and expected outputs.
 # 3 opponent type
@@ -30,12 +32,32 @@ def eval_genomes(genomes, config):
             attack = net.activate(gameInstance.get_net_data())
             gameInstance.sendAttack(attack)
         genome.fitness = gameInstance.get_fitness()
+        print('Fitness of ' + str(genome_id) + ' is: ' + str(genome.fitness))
         # Evaluate fitness
         # genome.fitness = 4.0
         # net = neat.nn.FeedForwardNetwork.create(genome, config)
         # for xi, xo in zip(xor_inputs, xor_outputs):
         #     output = net.activate(xi)
         #     genome.fitness -= (output[0] - xo[0]) ** 2
+
+class eval:
+    best = None
+    def eval_genome(self, genome, config):
+        # Play the game
+        net_random = neat.nn.FeedForwardNetwork.create(genome, config)
+        net_best = neat.nn.FeedForwardNetwork.create(eval.best, config)
+        gameInstance = Game()
+        while not gameInstance.game_finished:
+            # Output game inputs
+            attack_random = net_random.activate(gameInstance.get_net_data())
+            net_best = net_random.activate(gameInstance.get_net_data())
+            gameInstance.sendAttack(attack_random)
+            gameInstance.sendAttack(net_best)
+        genome.fitness = gameInstance.get_fitness()
+        #print('Fitness is: ' + str(genome.fitness))
+        if genome.fitness > 0:
+            eval.best = genome
+        return genome.fitness
 
 
 def run(config_file):
@@ -54,7 +76,11 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 300 generations.
-    winner = p.run(eval_genomes, 300)
+    generations = 10
+    evaler = eval()
+    pe = neat.ThreadedEvaluator(8, evaler.eval_genome)
+    winner = p.run(pe.evaluate, generations)
+    pe.stop()
 
     # Display the winning genome.
     print('\nBest genome:\n{!s}'.format(winner))
@@ -69,7 +95,19 @@ def run(config_file):
     # p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-4')
     # p.run(eval_genomes, 10)
 
-
+def load_best_genome(config_file):
+    greatest_genome = None
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-9')
+    
+    for g in itervalues(p.population):
+        if greatest_genome == None:
+            greatest_genome = g
+        if g.fitness > greatest_genome.fitness:
+            greatest_genome = g
+    return greatest_genome
+    
+    
+    
 if __name__ == '__main__':
     # Determine path to configuration file. This path manipulation is
     # here so that the script will run successfully regardless of the
@@ -77,3 +115,7 @@ if __name__ == '__main__':
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config-feedforward')
     run(config_path)
+    config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
+                         neat.DefaultSpeciesSet, neat.DefaultStagnation,
+                         config_path)
+    #eval_genome(load_best_genome(config_path), config)

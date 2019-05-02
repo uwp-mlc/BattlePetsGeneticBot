@@ -4,15 +4,16 @@ import json
 from gamestate import GameState
 
 class Game():
-    def __init__(self):
-        dirname = os.path.dirname(__file__)
-        self.child = popen_spawn.PopenSpawn(['java', '-cp', 'working_bp.jar', 'edu.furbiesfighters.gameplay.Main'])
+    round_info = None
+    def __init__(self,child,first):
+        self.child = child
+        self.first = first
         self.gamestate = GameState(1,1)
         self.game_finished = False
-        # Remove 'Start' string
-        self.child.readline()
+        
     def __del__(self):
         self.child.proc.terminate()
+        
     def sendAttack(self, attackArr):
         cooldowns = list(self.gamestate.me_cooldowns.values())
         for i, cooldown in enumerate(cooldowns):
@@ -30,10 +31,11 @@ class Game():
         else:
                 self.child.sendline("{}\r\n".format(attackIndex).encode('UTF-8'))
 
-        json_string = self.child.readline()
-        round_info = json.loads(str(json_string)[2:-5])
-
-        self.gamestate.remember_turn(round_info)
+        if not self.first:
+            json_string = self.child.readline()
+            Game.round_info = json.loads(str(json_string)[2:-5])
+            self.gamestate.remember_turn(Game.round_info)
+            print(json_string)
 
         if self.gamestate.me_health <= 0 or self.gamestate.op_health <= 0:
             self.game_finished = True

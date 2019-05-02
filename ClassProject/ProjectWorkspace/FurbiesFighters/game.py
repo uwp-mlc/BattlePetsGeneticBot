@@ -5,9 +5,9 @@ from gamestate import GameState
 
 class Game():
     round_info = None
-    def __init__(self,child,first):
+    ATTACKS = ["Rock", "Paper","Scissors","Shoot the moom","ROF Rock","ROF Paper","ROF Scissors","ROF Shoot the moon", "ROF ROF"]
+    def __init__(self,child):
         self.child = child
-        self.first = first
         self.gamestate = GameState(1,1)
         self.game_finished = False
         
@@ -24,6 +24,7 @@ class Game():
                 else:
                     attackArr[i] = 0
         attackIndex = attackArr.index(max(attackArr)) + 1
+        
 
         if(attackIndex > 4):
                 self.child.sendline("{}\r\n".format(5).encode('UTF-8'))
@@ -31,17 +32,20 @@ class Game():
         else:
                 self.child.sendline("{}\r\n".format(attackIndex).encode('UTF-8'))
 
-        if not self.first:
-            json_string = self.child.readline()
-            Game.round_info = json.loads(str(json_string)[2:-5])
-            self.gamestate.remember_turn(Game.round_info)
-            print(json_string)
-
         if self.gamestate.me_health <= 0 or self.gamestate.op_health <= 0:
             self.game_finished = True
 
     def get_fitness(self):
+        if self.gamestate.op_health < 0:
+            self.gamestate.op_health = 0
         return self.gamestate.me_health - self.gamestate.op_health
 
     def get_net_data(self):
         return self.gamestate.get_net_data()
+
+    @classmethod
+    def remember(child,gamestate):
+        json_string = child.readline()
+        Game.round_info = json.loads(str(json_string)[2:-5])
+        gamestate.remember_turn(Game.round_info)
+        print(json_string)

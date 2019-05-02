@@ -5,8 +5,9 @@ from gamestate import GameState
 
 class Game():
     round_info = None
+    child = None
     ATTACKS = ["Rock", "Paper","Scissors","Shoot the moom","ROF Rock","ROF Paper","ROF Scissors","ROF Shoot the moon", "ROF ROF"]
-    def __init__(self,child):
+    def __init__(self):
         self.child = child
         self.gamestate = GameState(1,1)
         self.game_finished = False
@@ -43,9 +44,9 @@ class Game():
     def get_net_data(self):
         return self.gamestate.get_net_data()
 
-    @classmethod
-    def remember(child,gamestate):
-        json_string = child.readline()
+    @staticmethod
+    def remember(gamestate):
+        json_string = Game.child.readline()
         Game.round_info = json.loads(str(json_string)[2:-5])
         gamestate.remember_turn(Game.round_info)
         print(json_string)

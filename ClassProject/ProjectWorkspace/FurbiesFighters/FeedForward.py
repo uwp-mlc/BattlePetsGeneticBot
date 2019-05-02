@@ -8,6 +8,7 @@ import os
 import neat
 import gzip, pickle
 from neat.six_util import iteritems, itervalues
+from pexpect import popen_spawn
 
 # 2-input XOR inputs and expected outputs.
 # 3 opponent type
@@ -53,6 +54,7 @@ class eval:
             net_best = net_random.activate(gameInstance.get_net_data())
             gameInstance.sendAttack(attack_random)
             gameInstance.sendAttack(net_best)
+        Game.remember(gameInstance.gamestate)
         genome.fitness = gameInstance.get_fitness()
         #print('Fitness is: ' + str(genome.fitness))
         if genome.fitness > 0:
@@ -76,8 +78,11 @@ def run(config_file):
     p.add_reporter(neat.Checkpointer(5))
 
     # Run for up to 300 generations.
+    
     generations = 10
     evaler = eval()
+    Game.child = popen_spawn.PopenSpawn(['java', '-cp', 'working_bp.jar', 'edu.furbiesfighters.gameplay.Main'])
+    evaler.best = load_best_genome(config_file)
     pe = neat.ThreadedEvaluator(8, evaler.eval_genome)
     winner = p.run(pe.evaluate, generations)
     pe.stop()
